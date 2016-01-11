@@ -8,7 +8,7 @@ settings:
   target_type: simplenews_newsletter
 module: simplenews
 locked: false
-cardinality: -1
+cardinality: 1
 indexes: {  }
 dependencies:
   module:

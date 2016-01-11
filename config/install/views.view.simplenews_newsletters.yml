@@ -486,7 +486,7 @@ display:
             identifier: ''
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
             reduce: false
@@ -497,7 +497,7 @@ display:
             identifier: ''
             optional: true
             widget: select
-            multiple: true
+            multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
@@ -523,7 +523,7 @@ display:
             identifier: simplenews_issue_target_id_1
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
               anonymous: '0'
@@ -536,7 +536,7 @@ display:
             identifier: ''
             optional: true
             widget: select
-            multiple: true
+            multiple: false
             remember: false
             default_group: All
             default_group_multiple: {  }
