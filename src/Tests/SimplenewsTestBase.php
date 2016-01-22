@@ -16,6 +16,8 @@ use Drupal\simplenews\Entity\Newsletter;
 use Drupal\simplenews\Entity\Subscriber;
 use Drupal\simpletest\WebTestBase;
 use Drupal\user\Entity\Role;
+use Drupal\Core\Field\WidgetBase;
+
 
 /**
  * Base class for simplenews web tests.
@@ -80,6 +82,35 @@ abstract class SimplenewsTestBase extends WebTestBase {
     }
     return 0;
   }
+  
+   /**
+   * Select randomly array of the available newsletters.
+   *
+   * @return array
+   *   The IDs of a newsletter.
+   */
+  function getRandomNewsletters($n) {
+	$newsletterArr = array();
+	$temp = array();	
+	$available_total_newsletters = count(simplenews_newsletter_get_all());	
+	
+	// Restricting the loop to maximum number of available newsletters. 
+	$loop_max_count = ($n < $available_total_newsletters) ? $n : $available_total_newsletters; 	
+	
+	for($i = 0; $i < $loop_max_count; $i++){
+	  $newletterId = $this->getRandomNewsletter();
+	  
+	  //Checking if item is already added, then skip it  
+	  if(!in_array($newletterId, $temp)){
+	    $newsletterArr[] = array('target_id' => $newletterId);
+		$temp[] = $newletterId;
+	  }else{
+		// Resetting the counter back to previous value if item is already exists
+		$i--;
+	  }
+	}
+	return $newsletterArr;
+  }
 
   /**
    * Enable newsletter subscription block.
@@ -108,6 +139,50 @@ abstract class SimplenewsTestBase extends WebTestBase {
     $this->assertTrue($block->id());
 
     return $block;
+  }
+  
+  function setUpSubscribersWithMultiNewsletters($count = 100, $newsletter_id = 'default') {
+    // Subscribe users.
+    $this->subscribers = array();
+    for ($i = 0; $i < $count; $i++) {
+      $mail = $this->randomEmail();
+      $this->subscribers[$mail] = $mail;
+    }
+
+    $this->drupalGet('admin/people/simplenews');
+    $this->clickLink(t('Mass subscribe'));
+
+	$count_subscribers = 0;
+	$newsletters_total = array();
+	$newletter_count_number = '';
+	
+	// Getting the newsletters Ids in an Array
+	foreach(simplenews_newsletter_get_all() as $key => $value){
+	  $newsletters_total[] = $key;
+	}
+	
+    // Assigning the newsletters to the subscribers 
+    foreach($this->subscribers as $subscribersName){
+		
+	  // Allowing only three subsribers for testing	
+	  if($count_subscribers > 2){
+		break;
+	  }else{
+        $newletter_count_number = $count_subscribers;
+        // Assigning the third Subscriber with the first newsletter id same as first one.
+        if($count_subscribers==2){
+		  $newletter_count_number = 0;
+		}
+	  }
+	  // Create the array for creating the subscription
+	  $edit = array(
+        'emails' => array($subscribersName),
+        'newsletters[' . $newsletters_total[$newletter_count_number] . ']' => TRUE,
+	  );
+	  $count_subscribers++;
+	  //Creating the Subscription
+      $this->drupalPostForm(NULL, $edit, t('Subscribe'));
+	}
   }
 
   function setUpSubscribers($count = 100, $newsletter_id = 'default') {
