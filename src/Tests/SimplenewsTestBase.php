@@ -149,9 +149,6 @@ abstract class SimplenewsTestBase extends WebTestBase {
       $this->subscribers[$mail] = $mail;
     }
 
-    $this->drupalGet('admin/people/simplenews');
-    $this->clickLink(t('Mass subscribe'));
-
 	$count_subscribers = 0;
 	$newsletters_total = array();
 	$newletter_count_number = '';
@@ -163,6 +160,9 @@ abstract class SimplenewsTestBase extends WebTestBase {
 	
     // Assigning the newsletters to the subscribers 
     foreach($this->subscribers as $subscribersName){
+		
+      $this->drupalGet('admin/people/simplenews');
+      $this->clickLink(t('Mass subscribe'));
 		
 	  // Allowing only three subsribers for testing	
 	  if($count_subscribers > 2){
@@ -176,13 +176,27 @@ abstract class SimplenewsTestBase extends WebTestBase {
 	  }
 	  // Create the array for creating the subscription
 	  $edit = array(
-        'emails' => array($subscribersName),
+        'emails' => $subscribersName,
         'newsletters[' . $newsletters_total[$newletter_count_number] . ']' => TRUE,
 	  );
+	  
 	  $count_subscribers++;
-	  //Creating the Subscription
+	  //Creating the Subscription	  
       $this->drupalPostForm(NULL, $edit, t('Subscribe'));
+      
 	}
+	
+	$this->drupalGet('admin/people/simplenews');
+    $this->clickLink(t('Mass subscribe'));	
+	
+	// Assigning Second Newsleters to last user
+     $edit = array(
+      'emails' => $subscribersName,
+      'newsletters[' . $newsletters_total[1] . ']' => TRUE,
+	 );
+	 
+	 //Creating the Subscription
+     $this->drupalPostForm(NULL, $edit, t('Subscribe'));
   }
 
   function setUpSubscribers($count = 100, $newsletter_id = 'default') {
@@ -201,6 +215,7 @@ abstract class SimplenewsTestBase extends WebTestBase {
       'newsletters[' . $newsletter_id . ']' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Subscribe'));
+   
   }
 
   /**

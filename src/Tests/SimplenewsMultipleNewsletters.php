@@ -35,7 +35,7 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
     ));
     $this->drupalLogin($admin_user);
     
-    $this->setUpSubscribers(5);
+    //$this->setUpSubscribers(5);
   }
 
   /**
@@ -62,14 +62,13 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
       'type' => 'simplenews_issue',
       'title' => $this->randomString(10),
       'uid' => 0,
-      'status' => 1
+      'status' => 1,
+      'nid'=> 1
     ));
     
     $node->simplenews_issue = $this->getRandomNewsletters(2);
-    $node->simplenews_issue->handler = 'simplenews_all';  
-    
-    
-    // Work Pending from here ----------------------------------------------------
+    $node->simplenews_issue->handler = 'simplenews_all';
+    //$node->save();
     
     // Send the node.
     \Drupal::service('simplenews.spool_storage')->addFromEntity($node);
@@ -83,12 +82,14 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
 
     // Verify mails.
     $mails = $this->drupalGetMails();
-    $this->assertEqual(5, count($mails), t('All mails were sent.'));
+    $this->assertEqual(2, count($mails), t('All mails were sent.'));
     foreach ($mails as $mail) {
       $this->assertEqual($mail['subject'], '[Default newsletter] ' . $node->getTitle(), t('Mail has correct subject'));
       $this->assertTrue(isset($this->subscribers[$mail['to']]), t('Found valid recipient'));
       unset($this->subscribers[$mail['to']]);
+      
     }
+    
     $this->assertEqual(0, count($this->subscribers), t('all subscribers have been received a mail'));
 
     // Create another node.
@@ -96,18 +97,19 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
       'type' => 'simplenews_issue',
       'title' => $this->randomString(10),
       'uid' => 0,
-      'status' => 1
+      'status' => 1,
+      'nid' => 2
     ));
-    $node->simplenews_issue->target_id = $this->getRandomNewsletter();
+    $node->simplenews_issue = $this->getRandomNewsletters(2);
     $node->simplenews_issue->handler = 'simplenews_all';
-    $node->save();
+   // $node->save();
 
     // Send the node.
     \Drupal::service('simplenews.spool_storage')->addFromEntity($node);
     $node->save();
 
     // Make sure that they have been added.
-    $this->assertEqual(\Drupal::service('simplenews.spool_storage')->countMails(), 5);
+    $this->assertEqual(\Drupal::service('simplenews.spool_storage')->countMails(), 2);
 
     // Mark them as pending, fake a currently running send process.
     $this->assertEqual(count(\Drupal::service('simplenews.spool_storage')->getMails(2)), 2);
