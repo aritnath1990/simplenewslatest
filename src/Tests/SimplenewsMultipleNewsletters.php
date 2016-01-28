@@ -72,6 +72,9 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
     \Drupal::service('simplenews.spool_storage')->addFromEntity($node);
     $node->save();
 
+    // Subsciber Count
+    $this->assertEqual(3, count($this->subscribers), t('all subscribers have been received a mail'));
+
     // Make sure that they have been added.
     $this->assertEqual(\Drupal::service('simplenews.spool_storage')->countMails(), 3);
 
