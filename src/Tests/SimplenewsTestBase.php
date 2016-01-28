@@ -146,7 +146,7 @@ abstract class SimplenewsTestBase extends WebTestBase {
     $this->subscribers = array();
     for ($i = 0; $i < $count; $i++) {
       $mail = $this->randomEmail();
-      $this->subscribers[$mail] = $mail;
+      $this->subscribers[] = $mail;
     }
 
 	$count_subscribers = 0;
