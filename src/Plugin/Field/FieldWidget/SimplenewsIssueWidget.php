@@ -59,8 +59,8 @@ class SimplenewsIssueWidget extends WidgetBase {
    */
   public function settingsSummary() {
     $summary = array();
-    $display_label = $this->getSetting('display_label');
-    $summary[] = t('Use field label: @display_label', array('@display_label' => ($display_label ? t('Yes') : 'No')));
+    $display_label = $this->getSetting('allow_multiple');
+    $summary[] = t('Use field label: @allow_multiple', array('@allow_multiple' => ($display_label ? t('Yes') : 'No')));
     return $summary;
   }
 
