@@ -33,7 +33,7 @@ class SimplenewsIssueWidget extends WidgetBase {
    */
   public static function defaultSettings() {
     return array(
-      'display_label' => FALSE,
+      'allow_multiple' => FALSE,
     ) + parent::defaultSettings();
   }
 
@@ -43,11 +43,11 @@ class SimplenewsIssueWidget extends WidgetBase {
   public function settingsForm(array $form, FormStateInterface $form_state) {
 	
     $field_storage = FieldStorageConfig::loadByName('node', 'simplenews_issue');   
-	if($field_storage->getCardinality()<1){
-      $element['display_label'] = array(
+	if($field_storage->getCardinality()!=1){
+      $element['allow_multiple'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Use Multiple'),
-        '#default_value' => $this->getSetting('display_label'),
+        '#title' => t('Allow multiple newsletters to be selected'),
+        '#default_value' => $this->getSetting('allow_multiple'),
         '#weight' => -1,
       );
     }
@@ -118,19 +118,13 @@ class SimplenewsIssueWidget extends WidgetBase {
 	$element_type="select";
 	
 	// Cheking if it's UNLIMITED or not.
-	if($field_storage->getCardinality()==-1){
+	if($field_storage->getCardinality()!=1){
 	  // Determining the field type from the issue setings if it is UNLIMITED
-	  if($this->getSetting('display_label')!="1"){
-	    $element_type='select';
-	  }
-	  else{
+	  if($this->getSetting('allow_multiple')=="1"){
 	    $element_type='checkboxes';
 	  }
 	}
-	elseif($field_storage->getCardinality()>1){
-	  $element_type='checkboxes';
-	}
-	
+		
 	// Setting the field.	
 	$element += array(
 	  '#type' => $element_type,
