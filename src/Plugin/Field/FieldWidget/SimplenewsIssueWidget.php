@@ -11,6 +11,8 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Plugin implementation of the 'simplenews_issue_select' widget.
@@ -39,13 +41,17 @@ class SimplenewsIssueWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $element['display_label'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use Multi Option in Newsletters'),
-      '#default_value' => $this->getSetting('display_label'),
-      '#weight' => -1,
-    );
-    return $element;
+	
+    $field_storage = FieldStorageConfig::loadByName('node', 'simplenews_issue');   
+	if($field_storage->getCardinality()<1){
+      $element['display_label'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Use Multiple'),
+        '#default_value' => $this->getSetting('display_label'),
+        '#weight' => -1,
+      );
+    }
+	return $element;
   }
 
   /**
@@ -56,34 +62,6 @@ class SimplenewsIssueWidget extends WidgetBase {
     $display_label = $this->getSetting('display_label');
     $summary[] = t('Use field label: @display_label', array('@display_label' => ($display_label ? t('Yes') : 'No')));
     return $summary;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form,     FormStateInterface $form_state) { 
-    $option=array();
-    foreach($items as $key => $val){
-      $option[]=$val->target_id;
-    }
-    $element = $element + array(
-      '#type' => 'checkboxes',
-      '#default_value' =>$option,
-      '#options' => simplenews_newsletter_list(),
-      '#title' => '',
-    ); 
-   
-    // Add our custom validator.
-    $element['#element_validate'][] = array(get_class($this), 'validateElement');
-    $element['#key_column'] = $this->column;
-
-    // Override the title from the incoming $element.
-    if ($this->getSetting('display_label')) {
-      $element['value']['#title'] = $this->fieldDefinition->getLabel();
-    }else {
-      $element['value']['#title'] = $this->fieldDefinition->getSetting('on_label');
-    }
-    return $element; 
   }
 
  /**
@@ -122,5 +100,57 @@ class SimplenewsIssueWidget extends WidgetBase {
       $items[] = array('target_id' => $value);
     }
     $form_state->setValueForElement($element, $items);
-  } 
+         
+  }  
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {  
+    // To get the Cardinality value.
+    $field_storage = FieldStorageConfig::loadByName('node', 'simplenews_issue'); 
+    $options = array();
+	foreach($items as $key => $val){
+	  $options[] = $val->target_id;
+	}
+	
+	// Determining the type of the field.
+	$element_type="select";
+	
+	// Cheking if it's UNLIMITED or not.
+	if($field_storage->getCardinality()==-1){
+	  // Determining the field type from the issue setings if it is UNLIMITED
+	  if($this->getSetting('display_label')!="1"){
+	    $element_type='select';
+	  }
+	  else{
+	    $element_type='checkboxes';
+	  }
+	}
+	elseif($field_storage->getCardinality()>1){
+	  $element_type='checkboxes';
+	}
+	
+	// Setting the field.	
+	$element += array(
+	  '#type' => $element_type,
+	  '#default_value' => $options,
+	  '#options' => $this->getOptions(simplenews_newsletter_list()),
+	); 
+		
+    // Add our custom validator.
+    $element['#element_validate'][] = array(get_class($this), 'validateElement');
+    return $element;    
+  }
+  
+  /**
+   * {@inheritdoc}
+   */
+  public function getOptions(array $optionArr){
+	$optionReturn =  array();
+	foreach($optionArr as $key =>$optionData){
+		$optionReturn[$key] = $optionData->__toString();
+	}
+	return $optionReturn;
+  }
 }
