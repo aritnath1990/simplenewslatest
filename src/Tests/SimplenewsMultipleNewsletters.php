@@ -35,7 +35,6 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
     ));
     $this->drupalLogin($admin_user);
     
-    //$this->setUpSubscribers(5);
   }
 
   /**
@@ -43,7 +42,7 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
    */
   function testProgrammaticNewsletterMultiple() {
 
-    // Add a new newsletter
+    // Create a new newsletter
     $this->drupalGet('admin/config/services/simplenews');
     $this->clickLink(t('Add newsletter'));
     $edit = array(
@@ -52,10 +51,12 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
       'description' => $this->randomString(20),
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
+    
+    // Checking if node creating successful with correct name
     $this->assertText(t('Newsletter @name has been added', array('@name' => $edit['name'])));
 	  
-    // Subscribe a few users.	  
-    $this->setUpSubscribersWithMultiNewsletters(3);
+    // Subscription setup	  
+    $this->setUpSubscribersWithMultiNewsletters();
 
     // Create a very basic node.
     $node = Node::create(array(
@@ -68,11 +69,11 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
     $node->simplenews_issue->handler = 'simplenews_all';
     $node->save();
 
-    // Send the node.
+    // Add the subscribers of the node to the spool storage queue.
     \Drupal::service('simplenews.spool_storage')->addFromEntity($node);
     $node->save();
 
-    // Subsciber Count
+    // Subsciber Count check
     $this->assertEqual(3, count($this->subscribers), t('all subscribers have been received a mail'));
 
     // Make sure that they have been added.
@@ -84,10 +85,10 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
     // Those two should be excluded from the count now.
     $this->assertEqual(\Drupal::service('simplenews.spool_storage')->countMails(), 1);
 
-    // Get two additional spool entries.
+    // Get one additional spool entry.
     $this->assertEqual(count(\Drupal::service('simplenews.spool_storage')->getMails(1)), 1);
 
-    // Now only one should be returned by the count.
+    // Now only none should be returned by the count.
     $this->assertEqual(\Drupal::service('simplenews.spool_storage')->countMails(), 0);
   }
 }
