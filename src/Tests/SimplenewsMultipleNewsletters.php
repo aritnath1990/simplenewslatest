@@ -34,14 +34,12 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
       'delete any simplenews_issue content',
     ));
     $this->drupalLogin($admin_user);
-    
   }
 
   /**
    * Creates and sends a node using the API to Multiple.
    */
   function testProgrammaticNewsletterMultiple() {
-
     // Create a new newsletter
     $this->drupalGet('admin/config/services/simplenews');
     $this->clickLink(t('Add newsletter'));
@@ -51,11 +49,11 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
       'description' => $this->randomString(20),
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    
+
     // Checking if node creating successful with correct name
     $this->assertText(t('Newsletter @name has been added', array('@name' => $edit['name'])));
-	  
-    // Subscription setup	  
+
+    // Subscription setup
     $this->setUpSubscribersWithMultiNewsletters();
 
     // Create a very basic node.
