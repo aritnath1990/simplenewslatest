@@ -10,7 +10,6 @@
 namespace Drupal\simplenews\Tests;
 
 use Drupal\node\Entity\Node;
-use Drupal\user\Entity\User;
 use Drupal\simplenews\Tests\SimplenewsTestBase;
 
 /**
@@ -19,8 +18,10 @@ use Drupal\simplenews\Tests\SimplenewsTestBase;
  * @group simplenews
  */
 class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
-
-  function setUp() {
+  /**
+   * Initialized the test SimplenewsMultipleNewsletters.
+   */
+  public function setUp() {
     parent::setUp();
 
     $admin_user = $this->drupalCreateUser(array(
@@ -39,8 +40,8 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
   /**
    * Creates and sends a node using the API to Multiple.
    */
-  function testProgrammaticNewsletterMultiple() {
-    // Create a new newsletter
+  public function testProgrammaticNewsletterMultiple() {
+    // Create a new newsletter.
     $this->drupalGet('admin/config/services/simplenews');
     $this->clickLink(t('Add newsletter'));
     $edit = array(
@@ -50,10 +51,10 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
 
-    // Checking if node creating successful with correct name
+    // Checking if node creating successful with correct name.
     $this->assertText(t('Newsletter @name has been added', array('@name' => $edit['name'])));
 
-    // Subscription setup
+    // Subscription setupSimplenewsMultipleNewsletters.
     $this->setUpSubscribersWithMultiNewsletters();
 
     // Create a very basic node.
@@ -61,7 +62,7 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
       'type' => 'simplenews_issue',
       'title' => $this->randomString(10),
       'uid' => 0,
-      'status' => 1
+      'status' => 1,
     ));
     $node->simplenews_issue = $this->getRandomNewsletters(2);
     $node->simplenews_issue->handler = 'simplenews_all';
@@ -71,7 +72,7 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
     \Drupal::service('simplenews.spool_storage')->addFromEntity($node);
     $node->save();
 
-    // Subsciber Count check
+    // Subsciber Count check.
     $this->assertEqual(3, count($this->subscribers), t('all subscribers have been received a mail'));
 
     // Make sure that they have been added.
@@ -89,4 +90,5 @@ class SimplenewsMultipleNewsletters extends SimplenewsTestBase {
     // Now only none should be returned by the count.
     $this->assertEqual(\Drupal::service('simplenews.spool_storage')->countMails(), 0);
   }
+
 }

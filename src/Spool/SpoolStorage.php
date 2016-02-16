@@ -238,14 +238,13 @@ class SpoolStorage implements SpoolStorageInterface {
    * {@inheritdoc}
    */
   public function addFromEntity(NodeInterface $node) {
-   // Loop for handling the multi-Newsletter options
-   foreach($node->simplenews_issue as $simplenews_issue){
-     $newsletter = $simplenews_issue->entity;
-     $handler = $simplenews_issue->handler;
-     $handler_settings = $simplenews_issue->handler_settings;
-     $recipient_handler = simplenews_get_recipient_handler($newsletter, $handler, $handler_settings);
-
-     // To send the newsletter, the node id and target email addresses
+    // Loop for handling the multi-Newsletter options.
+    foreach ($node->simplenews_issue as $simplenews_issue) {
+      $newsletter = $simplenews_issue->entity;
+      $handler = $simplenews_issue->handler;
+      $handler_settings = $simplenews_issue->handler_settings;
+      $recipient_handler = simplenews_get_recipient_handler($newsletter, $handler, $handler_settings);
+      // To send the newsletter, the node id and target email addresses.
       // are stored in the spool.
       // Only subscribed recipients are stored in the spool (status = 1).
       $select = $recipient_handler->buildRecipientQuery();
@@ -258,15 +257,15 @@ class SpoolStorage implements SpoolStorageInterface {
       $simplenews_issue->subscribers = simplenews_count_subscriptions($simplenews_issue->target_id);
 
       $this->connection->insert('simplenews_mail_spool')
-      ->from($select)
-      ->execute();
+        ->from($select)
+        ->execute();
 
       // Update simplenews newsletter status to send pending.
       $simplenews_issue->status = SIMPLENEWS_STATUS_SEND_PENDING;
 
       // Notify other modules that a newsletter was just spooled.
       $this->moduleHandler->invokeAll('simplenews_spooled', array($node));
-   }
+    }
   }
 
   /**

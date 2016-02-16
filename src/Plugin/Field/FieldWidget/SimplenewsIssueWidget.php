@@ -10,8 +10,6 @@ namespace Drupal\simplenews\Plugin\Field\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
@@ -42,7 +40,7 @@ class SimplenewsIssueWidget extends WidgetBase {
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $field_storage = FieldStorageConfig::loadByName('node', 'simplenews_issue');
-    if($field_storage->getCardinality()!=1){
+    if ($field_storage->getCardinality() != 1) {
       $element['allow_multiple'] = array(
         '#type' => 'checkbox',
         '#title' => t('Allow multiple newsletters to be selected'),
@@ -59,11 +57,11 @@ class SimplenewsIssueWidget extends WidgetBase {
   public function settingsSummary() {
     $summary = array();
     $display_label = $this->getSetting('allow_multiple');
-    $summary[] = t('Use field label: @allow_multiple', array('@allow_multiple' => ($display_label ? t('Yes') : 'No')));
+    $summary[] = t('Allow multiple: @allow_multiple', array('@allow_multiple' => ($display_label ? t('Yes') : 'No')));
     return $summary;
   }
 
- /**
+  /**
    * Form validation handler for widget elements.
    *
    * @param array $element
@@ -82,7 +80,8 @@ class SimplenewsIssueWidget extends WidgetBase {
     // widgets return the opposite.
     if (is_array($element['#value'])) {
       $values = array_values($element['#value']);
-    }else {
+    }
+    else {
       $values = array($element['#value']);
     }
 
@@ -108,26 +107,26 @@ class SimplenewsIssueWidget extends WidgetBase {
     // To get the Cardinality value.
     $field_storage = FieldStorageConfig::loadByName('node', 'simplenews_issue');
     $options = array();
-    foreach($items as $key => $val){
+    foreach ($items as $key => $val) {
       $options[] = $val->target_id;
     }
 
     // Determining the type of the field.
-    $element_type="select";
+    $element_type = "select";
 
-   // Cheking if it's UNLIMITED or not.
-   if($field_storage->getCardinality()!=1){
-     // Determining the field type from the issue setings if it is UNLIMITED
-     if($this->getSetting('allow_multiple')=="1"){
-       $element_type='checkboxes';
-     }
-   }
+    // Cheking if it's UNLIMITED or not.
+    if ($field_storage->getCardinality() != 1) {
+      // Determining the field type from the issue setings if it is UNLIMITED.
+      if ($this->getSetting('allow_multiple') == "1") {
+        $element_type = 'checkboxes';
+      }
+    }
     // Setting the field.
     $element += array(
       '#type' => $element_type,
-     '#default_value' => $options,
-     '#options' => $this->getOptions(simplenews_newsletter_list()),
-   );
+      '#default_value' => $options,
+      '#options' => $this->getOptions(simplenews_newsletter_list()),
+    );
     // Add our custom validator.
     $element['#element_validate'][] = array(get_class($this), 'validateElement');
     return $element;
@@ -136,11 +135,12 @@ class SimplenewsIssueWidget extends WidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function getOptions(array $optionArr){
-    $optionReturn =  array();
-    foreach($optionArr as $key =>$optionData){
-      $optionReturn[$key] = $optionData->__toString();
+  public function getOptions(array $optionarr) {
+    $optionreturn = array();
+    foreach ($optionarr as $key => $optiondata) {
+      $optionreturn[$key] = $optiondata->__toString();
     }
-    return $optionReturn;
+    return $optionreturn;
   }
+
 }

@@ -15,9 +15,6 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simplenews\Entity\Newsletter;
 use Drupal\simplenews\Entity\Subscriber;
 use Drupal\simpletest\WebTestBase;
-use Drupal\user\Entity\Role;
-use Drupal\Core\Field\WidgetBase;
-
 /**
  * Base class for simplenews web tests.
  */
@@ -82,7 +79,7 @@ abstract class SimplenewsTestBase extends WebTestBase {
     return 0;
   }
 
-   /**
+  /**
    * Select randomly array of the available newsletters.
    *
    * @param string $n
@@ -90,34 +87,35 @@ abstract class SimplenewsTestBase extends WebTestBase {
    * @return array
    *   The IDs of a newsletter.
    */
-  function getRandomNewsletters($n) {
-   $newsletterArr = array();
-   $temp = array();
-   $available_total_newsletters = count(simplenews_newsletter_get_all());
-   // Restricting the loop to maximum number of available newsletters.
-   $loop_max_count = ($n < $available_total_newsletters) ? $n : $available_total_newsletters;
-   for($i = 0; $i < $loop_max_count; $i++){
-     $newletterId = $this->getRandomNewsletter();
-     //Checking if item is already added, then skip it
-     if(!in_array($newletterId, $temp)){
-       $newsletterArr[] = array('target_id' => $newletterId);
-        $temp[] = $newletterId;
-     }else{
-        // Resetting the counter back to previous value if item is already exists
+  public function getRandomNewsletters($n) {
+    $newsletterarr = array();
+    $temp = array();
+    $available_total_newsletters = count(simplenews_newsletter_get_all());
+    // Restricting the loop to maximum number of available newsletters.
+    $loop_max_count = ($n < $available_total_newsletters) ? $n : $available_total_newsletters;
+    for ($i = 0; $i < $loop_max_count; $i++) {
+      $newletterid = $this->getRandomNewsletter();
+      // Checking if item is already added, then skip it.
+      if (!in_array($newletterid, $temp)) {
+        $newsletterarr[] = array('target_id' => $newletterid);
+        $temp[] = $newletterid;
+      }
+      else {
+        // Resetting the counter back to previous value if item is already exists.
         $i--;
-     }
-   }
-   return $newsletterArr;
+      }
+    }
+    return $newsletterarr;
   }
 
   /**
    * Enable newsletter subscription block.
    *
    * @param array $settings
-   *  ['newsletters'] = Array of newsletters (id => 1)
-   *  ['message'] = Block message
-   *  ['link_previous'] = {1, 0} Display link to previous issues
-   *  ['rss_feed'] = {1, 0} Display RSS-feed icon
+   *   ['newsletters'] = Array of newsletters (id => 1)
+   *   ['message'] = Block message
+   *   ['link_previous'] = {1, 0} Display link to previous issues
+   *   ['rss_feed'] = {1, 0} Display RSS-feed icon.
    */
   function setupSubscriptionBlock($settings = array()) {
 
@@ -145,11 +143,11 @@ abstract class SimplenewsTestBase extends WebTestBase {
    *
    * Assigning the two newsletters to the three subscribers,
    * Where first two subscribers subscribe the first two newsletters
-   * And third subscriber subscribe both newsletters
+   * And third subscriber subscribe both newsletters.
    */
-  function setUpSubscribersWithMultiNewsletters() {
+  public function setUpSubscribersWithMultiNewsletters() {
 
-    // Intilizing required variables
+    // Intilizing required variables.
     $count_subscribers = 0;
     $newsletters_total = array();
 
@@ -160,50 +158,50 @@ abstract class SimplenewsTestBase extends WebTestBase {
       $this->subscribers[] = $mail;
     }
 
-    // Fetching newletters into an array
-    foreach(simplenews_newsletter_get_all() as $key => $value){
+    // Fetching newletters into an array.
+    foreach (simplenews_newsletter_get_all() as $key => $value) {
       $newsletters_total[] = $key;
     }
 
-    // Looping the subscriber for the first newsletter
-    foreach($this->subscribers as $subscribersName){
+    // Looping the subscriber for the first newsletter.
+    foreach ($this->subscribers as $subscribersname) {
       $this->drupalGet('admin/people/simplenews');
       $this->clickLink(t('Mass subscribe'));
-      // Ignoring the second subscriber for first newletters
-      if(++$count_subscribers==2){
+      // Ignoring the second subscriber for first newletters.
+      if (++$count_subscribers == 2) {
         continue;
       }
 
-      // Subscription array for the first newsletters
+      // Subscription array for the first newsletters.
       $edit = array(
-        'emails' => $subscribersName,
+        'emails' => $subscribersname,
         'newsletters[' . $newsletters_total[0] . ']' => TRUE,
       );
       $this->drupalPostForm(NULL, $edit, t('Subscribe'));
     }
 
-    // Re-setting subscriber count
+    // Re-setting subscriber count.
     $count_subscribers = 0;
 
-   // Looping the subscriber for the second newsletter
-   foreach($this->subscribers as $subscribersName){
+    // Looping the subscriber for the second newsletter.
+    foreach ($this->subscribers as $subscribersname) {
       $this->drupalGet('admin/people/simplenews');
       $this->clickLink(t('Mass subscribe'));
-      // Ignoring the first subscriber for first newletters
-      if(++$count_subscribers==1){
-       continue;
-     }
+      // Ignoring the first subscriber for first newletters.
+      if (++$count_subscribers == 1) {
+        continue;
+      }
 
-      // Subscription array for the second newsletters
+      // Subscription array for the second newsletters.
       $edit = array(
-        'emails' => $subscribersName,
+        'emails' => $subscribersname,
         'newsletters[' . $newsletters_total[1] . ']' => TRUE,
       );
       $this->drupalPostForm(NULL, $edit, t('Subscribe'));
     }
   }
 
-  function setUpSubscribers($count = 100, $newsletter_id = 'default') {
+  function setUpSubscribers ($count = 100, $newsletter_id = 'default') {
     // Subscribe users.
     $this->subscribers = array();
     for ($i = 0; $i < $count; $i++) {

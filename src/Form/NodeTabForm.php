@@ -29,18 +29,18 @@ class NodeTabForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, NodeInterface $node = NULL) {
     $config = \Drupal::config('simplenews.settings');
-
-   // Handling the multi-newsletters options
-   $subcriber_ids = array();
-   foreach($node->simplenews_issue as $simplenews_issue){
-     $subscribers = db_select('simplenews_subscriber__subscriptions', 'r')->fields('r', array('entity_id'))->condition('subscriptions_target_id', $simplenews_issue->target_id)->condition('subscriptions_status', 1)->execute()->fetchAll();
-     foreach($subscribers as $subscribe){
-       if (!in_array($subscribe->entity_id, $subcriber_ids)){
-          $subcriber_ids[] = $subscribe->entity_id;
-       }
-     }
+    // Handling the multi-newsletters options.
+    $subscriber_count = 0;
+    $backupsi = array();
+    foreach ($node->simplenews_issue as $simplenews_issue) {
+      $backupsi[] = $simplenews_issue->target_id;
     }
-    $subscriber_count = count($subcriber_ids);
+    $subscribers = db_select('simplenews_subscriber__subscriptions', 'r')
+      ->fields('r', array('entity_id'))
+      ->condition('subscriptions_target_id', $backupsi, 'in')
+      ->condition('subscriptions_status', 1)->groupBy('entity_id');
+    $subscribers->addExpression('count(subscriptions_target_id)', 'entitycount');
+    $subscriber_count = $subscribers->countQuery()->execute()->fetchField();
 
     $status = $node->simplenews_issue->status;
 
@@ -337,6 +337,5 @@ class NodeTabForm extends FormBase {
   public function ajaxUpdateRecipientHandlerSettings($form, FormStateInterface $form_state) {
     return empty($form['simplenews']['recipient_handler_settings']) ? array('#markup' => '<div id="recipient-handler-settings"></div>') : $form['simplenews']['recipient_handler_settings'];
   }
-
 
 }
